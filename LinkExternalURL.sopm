@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<otrs_package version="1.1">
+    <Name>LinkExternalURL</Name>
+    <Version>0.0.1</Version>
+    <Vendor>Renee Baecker, Perl-Services.de</Vendor>
+    <URL>http://perl-services.de/</URL>
+    <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
+    <Description Lang="en">Link tickets with external URLs.</Description>
+    <Description Lang="de">Tickets mit externen URLs verknuepfen.</Description>
+    <Framework>3.0.x</Framework>
+    
+    
+    <Filelist>
+        <File Location="Kernel/Config/Files/LinkExternalURL.xml" Permission="644"/>
+        <File Location="Kernel/Output/HTML/LinkObjectURL.pm" Permission="644"/>
+        <File Location="Kernel/System/URL.pm" Permission="644"/>
+        <File Location="Kernel/System/LinkObject/URL.pm" Permission="644"/>
+        <File Location="doc/en/LinkExternalURL.pod" Permission="644"/>
+    </Filelist>
+    <DatabaseInstall Type="post">
+        <TableCreate Type="post" Name="ps_urls">
+            <Column AutoIncrement="true" Name="id" PrimaryKey="true" Required="true" Type="INTEGER"/>
+            <Column Name="title" Required="false" Size="245" Type="VARCHAR"/>
+            <Column Name="url" Required="true" Size="500" Type="VARCHAR"/>
+        </TableCreate>
+    </DatabaseInstall>
+    <DatabaseUninstall Type="pre">
+        <TableDrop Type="pre" Name="ps_urls">
+        </TableDrop>
+    </DatabaseUninstall>
+</otrs_package>

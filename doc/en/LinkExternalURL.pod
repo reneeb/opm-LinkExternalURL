@@ -1,0 +1,27 @@
+=head1 NAME
+
+LinkExternalURL - enable linking a ticket with URLs.
+
+=head1 DESCRIPTION
+
+With this package installed, you can link a ticket with URLs. This can be useful if
+you articles in that ticket references external URLs and you don't want to search
+each article for such references.
+
+When this package is installed, you can view a ticket (AgentTicketZoom) and click on
+'Link'. Then you can choose 'URL' as the target object.
+
+If you search for an URL that is not in the datbase, it is added. The title is extracted
+from the content retrieved when the URL is fetched.
+
+The linked URLs are shown as Links in the ticket zoom.
+
+=head1 AUTHOR AND LICENSE
+
+This package was written by Renee Baecker E<lt>otrs@perl-services.deE<gt>, based
+on the original Logmodule of OTRS.
+
+The package is licensed unter AGPL. If you
+did not receive this file, see L<http://www.gnu.org/licenses/agpl.txt>.
+
+=cut
