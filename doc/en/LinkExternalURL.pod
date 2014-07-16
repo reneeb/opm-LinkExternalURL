@@ -16,6 +16,26 @@ from the content retrieved when the URL is fetched.
 
 The linked URLs are shown as Links in the ticket zoom.
 
+=head1 CHANGES
+
+=head2 3.3.1 - 2014-07-16
+
+=over 4
+
+=item * useable for OTRS 3.0.x - 3.3.x
+
+Without any change in the Perl code, this package works from OTRS 3.0.x to OTRS 3.3.x
+
+=item * Switched to OTRS::OPM::Maker
+
+=item * Added SysConfig options for FAQ and ITSMChangeManagemet
+
+Added options to enable linking URLs with FAQ entries, ITSM Changes and ITSM WorkOrders.
+They are invalid by default. When you want to use those features, you have to enable them
+in SysConfig (LinkExternalURL -> Core::LinkObject).
+
+=back
+
 =head1 AUTHOR AND LICENSE
 
 This package was written by Renee Baecker E<lt>otrs@perl-services.deE<gt>.
