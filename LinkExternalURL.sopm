@@ -1,26 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
-<otrs_package version="1.1">
+<?xml version="1.0" encoding="utf-8" ?>
+<otrs_package version="1.0">
+    <!-- GENERATED WITH OTRS::OPM::Maker::Command::sopm (1.21) -->
     <Name>LinkExternalURL</Name>
-    <Version>3.1.1</Version>
-    <Vendor>Renee Baecker, Perl-Services.de</Vendor>
-    <URL>http://perl-services.de/</URL>
-    <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
-    <Description Lang="en">Link tickets with external URLs.</Description>
-    <Description Lang="de">Tickets mit externen URLs verknuepfen.</Description>
+    <Version>3.3.1</Version>
     <Framework>3.0.x</Framework>
     <Framework>3.1.x</Framework>
+    <Framework>3.2.x</Framework>
+    <Framework>3.3.x</Framework>
+    <Vendor>Perl-Services.de</Vendor>
+    <URL>http://www.perl-services.de</URL>
+    <Description Lang="de">Objekte (z.B. Tickets) mit externen URLs verknüpfen</Description>
+    <Description Lang="en">Link objects (e.g. tickets) with external URLs</Description>
+    <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
     <Filelist>
         <File Permission="644" Location="Kernel/Config/Files/LinkExternalURL.xml" />
         <File Permission="644" Location="Kernel/Output/HTML/LinkObjectURL.pm" />
-        <File Permission="644" Location="Kernel/System/URL.pm" />
         <File Permission="644" Location="Kernel/System/LinkObject/URL.pm" />
+        <File Permission="644" Location="Kernel/System/URL.pm" />
+        <File Permission="644" Location="doc/LinkExternalURL.json" />
         <File Permission="644" Location="doc/en/LinkExternalURL.pod" />
     </Filelist>
     <DatabaseInstall Type="post">
         <TableCreate Name="ps_urls">
-            <Column AutoIncrement="true" Name="id" PrimaryKey="true" Required="true" Type="INTEGER"/>
-            <Column Name="title" Required="false" Size="245" Type="VARCHAR"/>
-            <Column Name="url" Required="true" Size="500" Type="VARCHAR"/>
+            <Column Name="id" Required="true" Type="INTEGER" AutoIncrement="true" PrimaryKey="true" />
+            <Column Name="title" Required="false" Type="VARCHAR" Size="250" />
+            <Column Name="url" Required="true" Type="VARCHAR" Size="2000" />
         </TableCreate>
     </DatabaseInstall>
     <DatabaseUninstall Type="pre">

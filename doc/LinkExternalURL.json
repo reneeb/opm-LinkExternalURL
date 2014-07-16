@@ -1,0 +1,31 @@
+{
+    "name": "LinkExternalURL",
+    "version": "3.3.1",
+    "framework": [
+        "3.0.x",
+        "3.1.x",
+        "3.2.x",
+        "3.3.x"
+    ],
+    "vendor": {
+        "name":  "Perl-Services.de",
+        "url": "http://www.perl-services.de"
+    },
+    "license": "GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007",
+    "description" : {
+        "en": "Link objects (e.g. tickets) with external URLs",
+        "de": "Objekte (z.B. Tickets) mit externen URLs verknüpfen"
+    },
+    "database" : [
+       {
+            "type": "TableCreate",
+            "version": 0,
+            "name": "ps_urls",
+            "columns": [
+                { "name": "id", "required": "true", "auto_increment": "true", "type": "INTEGER", "primary_key": "true" },
+                { "name": "title", "required": "false", "type": "VARCHAR", "size": 250 },
+                { "name": "url", "required": "true", "type": "VARCHAR", "size": 2000 }
+            ]
+        }
+    ]
+}
