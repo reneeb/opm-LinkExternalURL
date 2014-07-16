@@ -24,4 +24,40 @@
             </Hash>
         </Setting>
     </ConfigItem>
+    <ConfigItem Name="LinkObject::PossibleLink###0601-ExternalLinkChange" Required="0" Valid="0">
+        <Description Translatable="1">Links an ITSM change with an URL.</Description>
+        <Group>LinkExternalURL</Group>
+        <SubGroup>Core::LinkObject</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="Object1">ITSMChange</Item>
+                <Item Key="Object2">URL</Item>
+                <Item Key="Type">ExternalLink</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
+    <ConfigItem Name="LinkObject::PossibleLink###0602-ExternalLinkWorkorder" Required="0" Valid="0">
+        <Description Translatable="1">Links an ITSM workorder with an URL.</Description>
+        <Group>LinkExternalURL</Group>
+        <SubGroup>Core::LinkObject</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="Object1">ITSMWorkOrder</Item>
+                <Item Key="Object2">URL</Item>
+                <Item Key="Type">ExternalLink</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
+    <ConfigItem Name="LinkObject::PossibleLink###0603-ExternalLinkFAQ" Required="0" Valid="0">
+        <Description Translatable="1">Links a FAQ with an URL.</Description>
+        <Group>LinkExternalURL</Group>
+        <SubGroup>Core::LinkObject</SubGroup>
+        <Setting>
+            <Hash>
+                <Item Key="Object1">FAQ</Item>
+                <Item Key="Object2">URL</Item>
+                <Item Key="Type">ExternalLink</Item>
+            </Hash>
+        </Setting>
+    </ConfigItem>
 </otrs_config>
