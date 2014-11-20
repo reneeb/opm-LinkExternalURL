@@ -1,8 +1,6 @@
 # --
 # Kernel/System/LinkObject/URL.pm - to link ticket objects
-# Copyright (C) 2001-2009 OTRS AG, http://otrs.org/
-# --
-# $Id: URL.pm,v 1.36 2009/10/07 13:19:33 martin Exp $
+# Copyright (C) 2011 - 2014 Perl-Services.de, http://perl-services.de
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -14,10 +12,12 @@ package Kernel::System::LinkObject::URL;
 use strict;
 use warnings;
 
-use Kernel::System::URL;
+our $VERSION = 0.02;
 
-use vars qw($VERSION);
-$VERSION = qw($Revision: 1.36 $) [1];
+our @ObjectDependencies = qw(
+    Kernel::System::URL
+    Kernel::System::Log
+);
 
 sub new {
     my ( $Type, %Param ) = @_;
@@ -25,12 +25,6 @@ sub new {
     # allocate new hash for object
     my $Self = {};
     bless( $Self, $Type );
-
-    # check needed objects
-    for (qw(DBObject ConfigObject LogObject MainObject EncodeObject TimeObject)) {
-        $Self->{$_} = $Param{$_} || die "Got no $_!";
-    }
-    $Self->{URLObject} = Kernel::System::URL->new( %{$Self} );
 
     return $Self;
 }
@@ -49,10 +43,13 @@ fill up the link list with data
 sub LinkListWithData {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+    my $URLObject = $Kernel::OM->Get('Kernel::System::URL');
+
     # check needed stuff
     for my $Argument (qw(LinkList UserID)) {
         if ( !$Param{$Argument} ) {
-            $Self->{LogObject}->Log(
+            $LogObject->Log(
                 Priority => 'error',
                 Message  => "Need $Argument!",
             );
@@ -62,7 +59,7 @@ sub LinkListWithData {
 
     # check link list
     if ( ref $Param{LinkList} ne 'HASH' ) {
-        $Self->{LogObject}->Log(
+        $LogObject->Log(
             Priority => 'error',
             Message  => 'LinkList must be a hash reference!',
         );
@@ -77,7 +74,7 @@ sub LinkListWithData {
             for my $URLID ( keys %{ $Param{LinkList}->{$LinkType}->{$Direction} } ) {
 
                 # get ticket data
-                my %URLData = $Self->{URLObject}->URLGet(
+                my %URLData = $URLObject->URLGet(
                     ID     => $URLID,
                     UserID => $Param{UserID},
                 );
@@ -118,10 +115,13 @@ Return
 sub ObjectDescriptionGet {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+    my $URLObject = $Kernel::OM->Get('Kernel::System::URL');
+
     # check needed stuff
     for my $Argument (qw(Object Key UserID)) {
         if ( !$Param{$Argument} ) {
-            $Self->{LogObject}->Log(
+            $LogObject->Log(
                 Priority => 'error',
                 Message  => "Need $Argument!",
             );
@@ -138,7 +138,7 @@ sub ObjectDescriptionGet {
     return %Description if $Param{Mode} && $Param{Mode} eq 'Temporary';
 
     # get ticket
-    my %URL = $Self->{URLObject}->URLGet(
+    my %URL = $URLObject->URLGet(
         ID     => $Param{Key},
         UserID => 1,
     );
@@ -180,9 +180,12 @@ Return
 sub ObjectSearch {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+    my $URLObject = $Kernel::OM->Get('Kernel::System::URL');
+
     # check needed stuff
     if ( !$Param{UserID} ) {
-        $Self->{LogObject}->Log(
+        $LogObject->Log(
             Priority => 'error',
             Message  => 'Need UserID!',
         );
@@ -199,11 +202,11 @@ sub ObjectSearch {
     }
 
     # search the tickets
-    my @URLIDs = $Self->{URLObject}->URLSearch(
+    my @URLIDs = $URLObject->URLSearch(
         %{ $Param{SearchParams} },
         %Search,
-        Limit               => 50,
-        UserID              => $Param{UserID},
+        Limit  => 50,
+        UserID => $Param{UserID},
     );
 
     if ( !@URLIDs && $Param{SearchParams}->{URL} ) {
@@ -220,7 +223,7 @@ sub ObjectSearch {
 
         $Title ||= $Param{SearchParams}->{URL};
 
-        my $ID = $Self->{URLObject}->URLAdd(
+        my $ID = $URLObject->URLAdd(
             URL    => $Param{SearchParams}->{URL},
             Title  => $Title,
             UserID => $Param{UserID},
@@ -234,7 +237,7 @@ sub ObjectSearch {
     for my $URLID (@URLIDs) {
 
         # get ticket data
-        my %URLData = $Self->{URLObject}->URLGet(
+        my %URLData = $URLObject->URLGet(
             ID     => $URLID,
             UserID => $Param{UserID},
         );
@@ -277,10 +280,12 @@ link add pre event module
 sub LinkAddPre {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+
     # check needed stuff
     for my $Argument (qw(Key Type State UserID)) {
         if ( !$Param{$Argument} ) {
-            $Self->{LogObject}->Log(
+            $LogObject->Log(
                 Priority => 'error',
                 Message  => "Need $Argument!",
             );
@@ -322,10 +327,12 @@ link add pre event module
 sub LinkAddPost {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+
     # check needed stuff
     for my $Argument (qw(Key Type State UserID)) {
         if ( !$Param{$Argument} ) {
-            $Self->{LogObject}->Log(
+            $LogObject->Log(
                 Priority => 'error',
                 Message  => "Need $Argument!",
             );
@@ -366,10 +373,12 @@ link delete pre event module
 sub LinkDeletePre {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+
     # check needed stuff
     for my $Argument (qw(Key Type State UserID)) {
         if ( !$Param{$Argument} ) {
-            $Self->{LogObject}->Log(
+            $LogObject->Log(
                 Priority => 'error',
                 Message  => "Need $Argument!",
             );
@@ -411,10 +420,12 @@ link delete post event module
 sub LinkDeletePost {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+
     # check needed stuff
     for my $Argument (qw(Key Type State UserID)) {
         if ( !$Param{$Argument} ) {
-            $Self->{LogObject}->Log(
+            $LogObject->Log(
                 Priority => 'error',
                 Message  => "Need $Argument!",
             );
