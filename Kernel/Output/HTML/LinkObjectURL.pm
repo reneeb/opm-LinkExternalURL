@@ -1,8 +1,6 @@
 # --
 # Kernel/Output/HTML/LinkObjectURL.pm - layout backend module
-# Copyright (C) 2011 Perl-Services.de, http://www.perl-services.de
-# --
-# $Id: LinkObjectURL.pm,v 1.19 2009/11/25 15:49:32 mg Exp $
+# Copyright (C) 2011 - 2014 Perl-Services.de, http://www.perl-services.de
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -14,11 +12,12 @@ package Kernel::Output::HTML::LinkObjectURL;
 use strict;
 use warnings;
 
-use Kernel::Output::HTML::Layout;
-use Kernel::System::State;
+our $VERSION = 0.02;
 
-use vars qw($VERSION);
-$VERSION = qw($Revision: 1.19 $) [1];
+our @ObjectDependencies = qw(
+    Kernel::System::Web::Request
+    Kernel::Output::HTML::Layout
+);
 
 =head1 NAME
 
@@ -48,17 +47,6 @@ sub new {
     # allocate new hash for object
     my $Self = {};
     bless( $Self, $Type );
-
-    # check needed objects
-    for my $Object (
-        qw(ConfigObject LogObject MainObject DBObject UserObject EncodeObject
-        QueueObject GroupObject ParamObject TimeObject LanguageObject UserLanguage UserID)
-        )
-    {
-        $Self->{$Object} = $Param{$Object} || die "Got no $Object!";
-    }
-    $Self->{LayoutObject} = Kernel::Output::HTML::Layout->new( %{$Self} );
-    $Self->{StateObject}  = Kernel::System::State->new( %{$Self} );
 
     # define needed variables
     $Self->{ObjectData} = {
@@ -106,9 +94,11 @@ Return
 sub TableCreateComplex {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+
     # check needed stuff
     if ( !$Param{ObjectLinkListWithData} || ref $Param{ObjectLinkListWithData} ne 'HASH' ) {
-        $Self->{LogObject}->Log(
+        $LogObject->Log(
             Priority => 'error',
             Message  => 'Need ObjectLinkListWithData!',
         );
@@ -206,9 +196,14 @@ Return
 sub TableCreateSimple {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+
     # check needed stuff
     if ( !$Param{ObjectLinkListWithData} || ref $Param{ObjectLinkListWithData} ne 'HASH' ) {
-        $Self->{LogObject}->Log( Priority => 'error', Message => 'Need ObjectLinkListWithData!' );
+        $LogObject->Log(
+            Priority => 'error',
+            Message  => 'Need ObjectLinkListWithData!',
+        );
         return;
     }
 
@@ -266,9 +261,14 @@ return a output string
 sub ContentStringCreate {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+
     # check needed stuff
     if ( !$Param{ContentData} ) {
-        $Self->{LogObject}->Log( Priority => 'error', Message => 'Need ContentData!' );
+        $LogObject->Log(
+            Priority => 'error',
+            Message  => 'Need ContentData!',
+        );
         return;
     }
 
@@ -344,6 +344,9 @@ Return
 sub SearchOptionList {
     my ( $Self, %Param ) = @_;
 
+    my $ParamObject  = $Kernel::OM->Get('Kernel::System::Web::Request');
+    my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
+
     # search option list
     my @SearchOptionList = (
         {
@@ -371,19 +374,19 @@ sub SearchOptionList {
         if ( $Row->{Type} eq 'Text' ) {
 
             # get form data
-            $Row->{FormData} = $Self->{ParamObject}->GetParam( Param => $Row->{FormKey} );
+            $Row->{FormData} = $ParamObject->GetParam( Param => $Row->{FormKey} );
 
             # parse the input text block
-            $Self->{LayoutObject}->Block(
+            $LayoutObject->Block(
                 Name => 'InputText',
                 Data => {
-                    Key => $Row->{FormKey},
+                    Key   => $Row->{FormKey},
                     Value => $Row->{FormData} || '',
                 },
             );
 
             # add the input string
-            $Row->{InputStrg} = $Self->{LayoutObject}->Output(
+            $Row->{InputStrg} = $LayoutObject->Output(
                 TemplateFile => 'LinkObject',
             );
 
@@ -394,13 +397,13 @@ sub SearchOptionList {
         if ( $Row->{Type} eq 'List' ) {
 
             # get form data
-            my @FormData = $Self->{ParamObject}->GetArray( Param => $Row->{FormKey} );
+            my @FormData = $ParamObject->GetArray( Param => $Row->{FormKey} );
             $Row->{FormData} = \@FormData;
 
             my %ListData;
 
             # add the input string
-            $Row->{InputStrg} = $Self->{LayoutObject}->BuildSelection(
+            $Row->{InputStrg} = $LayoutObject->BuildSelection(
                 Data       => \%ListData,
                 Name       => $Row->{FormKey},
                 SelectedID => $Row->{FormData},
@@ -421,16 +424,9 @@ sub SearchOptionList {
 
 =head1 TERMS AND CONDITIONS
 
-This software is part of the OTRS project (http://otrs.org/).
-
 This software comes with ABSOLUTELY NO WARRANTY. For details, see
 the enclosed file COPYING for license information (AGPL). If you
 did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 
 =cut
 
-=head1 VERSION
-
-$Revision: 1.19 $ $Date: 2009/11/25 15:49:32 $
-
-=cut
