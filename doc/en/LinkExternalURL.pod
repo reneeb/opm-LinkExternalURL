@@ -36,6 +36,10 @@ in SysConfig (LinkExternalURL -> Core::LinkObject).
 
 =back
 
+=head1 REPOSITORY & BUGS
+
+The code repository and a bugtracker is available at L<http://github.com/reneeb/otrs-LinkExternalURL>.
+
 =head1 AUTHOR AND LICENSE
 
 This package was written by Renee Baecker E<lt>otrs@perl-services.deE<gt>.
