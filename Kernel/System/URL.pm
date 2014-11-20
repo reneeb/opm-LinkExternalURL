@@ -1,8 +1,6 @@
 # --
 # Kernel/System/URL.pm - All URL related functions should be here eventually
-# Copyright (C) 2001-2010 OTRS AG, http://otrs.org/
-# --
-# $Id: URL.pm,v 1.83 2010/09/01 07:50:22 bes Exp $
+# Copyright (C) 2011 - 2014 Perl-Services.de, http://perl-services.de
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -14,11 +12,12 @@ package Kernel::System::URL;
 use strict;
 use warnings;
 
-use Kernel::System::User;
-use Kernel::System::Valid;
+our $VERSION = 0.02;
 
-use vars qw($VERSION);
-$VERSION = qw($Revision: 1.83 $) [1];
+our @ObjectDependencies = qw(
+    Kernel::System::DB
+    Kernel::System::Log
+);
 
 =head1 NAME
 
@@ -34,40 +33,6 @@ Kernel::System::URL - backend for product news
 
 create an object
 
-    use Kernel::Config;
-    use Kernel::System::Encode;
-    use Kernel::System::Log;
-    use Kernel::System::Main;
-    use Kernel::System::DB;
-    use Kernel::System::URL;
-
-    my $ConfigObject = Kernel::Config->new();
-    my $EncodeObject = Kernel::System::Encode->new(
-        ConfigObject => $ConfigObject,
-    );
-    my $LogObject = Kernel::System::Log->new(
-        ConfigObject => $ConfigObject,
-        EncodeObject => $EncodeObject,
-    );
-    my $MainObject = Kernel::System::Main->new(
-        ConfigObject => $ConfigObject,
-        EncodeObject => $EncodeObject,
-        LogObject    => $LogObject,
-    );
-    my $DBObject = Kernel::System::DB->new(
-        ConfigObject => $ConfigObject,
-        EncodeObject => $EncodeObject,
-        LogObject    => $LogObject,
-        MainObject   => $MainObject,
-    );
-    my $URLObject = Kernel::System::URL->new(
-        ConfigObject => $ConfigObject,
-        LogObject    => $LogObject,
-        DBObject     => $DBObject,
-        MainObject   => $MainObject,
-        EncodeObject => $EncodeObject,
-    );
-
 =cut
 
 sub new {
@@ -77,11 +42,6 @@ sub new {
     my $Self = {};
     bless( $Self, $Type );
 
-    # check needed objects
-    for my $Object (qw(DBObject ConfigObject MainObject LogObject EncodeObject)) {
-        $Self->{$Object} = $Param{$Object} || die "Got no $Object!";
-    }
-    
     return $Self;
 }
 
@@ -99,10 +59,13 @@ to add a news
 sub URLAdd {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+    my $DBObject  = $Kernel::OM->Get('Kernel::System::DB');
+
     # check needed stuff
     for my $Needed (qw(URL UserID Title)) {
         if ( !$Param{$Needed} ) {
-            $Self->{LogObject}->Log(
+            $LogObject->Log(
                 Priority => 'error',
                 Message  => "Need $Needed!",
             );
@@ -111,7 +74,7 @@ sub URLAdd {
     }
 
     # insert new news
-    return if !$Self->{DBObject}->Do(
+    return if !$DBObject->Do(
         SQL => 'INSERT INTO ps_urls (title, url) VALUES (?, ?)',
         Bind => [
             \$Param{Title},
@@ -120,19 +83,19 @@ sub URLAdd {
     );
 
     # get new url id
-    return if !$Self->{DBObject}->Prepare(
+    return if !$DBObject->Prepare(
         SQL   => 'SELECT MAX(id) FROM ps_urls WHERE url = ? AND title = ?',
         Bind  => [ \$Param{URL}, \$Param{Title} ],
         Limit => 1,
     );
 
     my $URLID;
-    while ( my @Row = $Self->{DBObject}->FetchrowArray() ) {
+    while ( my @Row = $DBObject->FetchrowArray() ) {
         $URLID = $Row[0];
     }
 
     # log notice
-    $Self->{LogObject}->Log(
+    $LogObject->Log(
         Priority => 'notice',
         Message  => "URL '$URLID' created successfully ($Param{UserID})!",
     );
@@ -159,9 +122,12 @@ This returns something like:
 sub URLGet {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+    my $DBObject  = $Kernel::OM->Get('Kernel::System::DB');
+
     # check needed stuff
     if ( !$Param{ID} ) {
-        $Self->{LogObject}->Log(
+        $LogObject->Log(
             Priority => 'error',
             Message  => 'Need ID!',
         );
@@ -169,14 +135,14 @@ sub URLGet {
     }
 
     # sql
-    return if !$Self->{DBObject}->Prepare(
+    return if !$DBObject->Prepare(
         SQL => 'SELECT id, title, url FROM ps_urls WHERE id = ?',
         Bind  => [ \$Param{ID} ],
         Limit => 1,
     );
 
     my %URL;
-    while ( my @Data = $Self->{DBObject}->FetchrowArray() ) {
+    while ( my @Data = $DBObject->FetchrowArray() ) {
         %URL = (
             ID    => $Data[0],
             Title => $Data[1],
@@ -200,16 +166,19 @@ deletes a news entry. Returns 1 if it was successful, undef otherwise.
 sub URLDelete {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+    my $DBObject  = $Kernel::OM->Get('Kernel::System::DB');
+
     # check needed stuff
     if ( !$Param{ID} ) {
-        $Self->{LogObject}->Log(
+        $LogObject->Log(
             Priority => 'error',
             Message  => 'Need ID!',
         );
         return;
     }
 
-    return $Self->{DBObject}->Do(
+    return $DBObject->Do(
         SQL  => 'DELETE FROM ps_urls WHERE id = ?',
         Bind => [ \$Param{ID} ],
     );
@@ -222,9 +191,12 @@ sub URLDelete {
 sub URLSearch {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+    my $DBObject  = $Kernel::OM->Get('Kernel::System::DB');
+
     # check for needed params
     if ( !$Param{URL} && !$Param{Title} ) {
-        $Self->{LogObject}->Log(
+        $LogObject->Log(
             Priority => 'error',
             Message  => "Need URL or Title!",
         );
@@ -253,7 +225,7 @@ sub URLSearch {
     my $Where = join ' OR ', @Where;
     $SQL     .= $Where;
 
-    return if !$Self->{DBObject}->Prepare(
+    return if !$DBObject->Prepare(
        SQL   => $SQL,
        Bind  => \@Bind,
        Limit => $Param{Limit}, 
@@ -261,7 +233,7 @@ sub URLSearch {
 
     my @UrlIDs;
 
-    while ( my ($ID) = $Self->{DBObject}->FetchrowArray() ) {
+    while ( my ($ID) = $DBObject->FetchrowArray() ) {
         push @UrlIDs, $ID;
     }
 
@@ -287,13 +259,16 @@ the result looks like
 sub URLList {
     my ( $Self, %Param ) = @_;
 
+    my $LogObject = $Kernel::OM->Get('Kernel::System::Log');
+    my $DBObject  = $Kernel::OM->Get('Kernel::System::DB');
+
     # sql
-    return if !$Self->{DBObject}->Prepare(
+    return if !$DBObject->Prepare(
         SQL  => "SELECT id, url FROM ps_urls",
     );
 
     my %URL;
-    while ( my @Data = $Self->{DBObject}->FetchrowArray() ) {
+    while ( my @Data = $DBObject->FetchrowArray() ) {
         $URL{ $Data[0] } = $Data[1];
     }
 
@@ -312,8 +287,3 @@ did not receive this file, see L<http://www.gnu.org/licenses/agpl.txt>.
 
 =cut
 
-=head1 VERSION
-
-$Revision: 1.83 $ $Date: 2010/09/01 07:50:22 $
-
-=cut
