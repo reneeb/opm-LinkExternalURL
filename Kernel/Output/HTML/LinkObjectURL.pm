@@ -35,8 +35,9 @@ All layout functions of link object (URL)
 
 create an object
 
-    $BackendObject = Kernel::Output::HTML::LinkObjectURL->new(
-        %Param,
+    $BackendObject = Kernel::Output::HTML::LinkObjectTicket->new(
+        UserLanguage => 'en',
+        UserID       => 1,
     );
 
 =cut
@@ -47,6 +48,15 @@ sub new {
     # allocate new hash for object
     my $Self = {};
     bless( $Self, $Type );
+
+    # check needed objects
+    for my $Needed (qw(UserLanguage UserID)) {
+        $Self->{$Needed} = $Param{$Needed} || die "Got no $Needed!";
+    }
+
+    # We need our own LayoutObject instance to avoid blockdata collisions
+    #   with the main page.
+    $Self->{LayoutObject} = Kernel::Output::HTML::Layout->new( %{$Self} );
 
     # define needed variables
     $Self->{ObjectData} = {
@@ -107,17 +117,17 @@ sub TableCreateComplex {
 
     # convert the list
     my %LinkList;
-    for my $LinkType ( keys %{ $Param{ObjectLinkListWithData} } ) {
+    for my $LinkType ( sort keys %{ $Param{ObjectLinkListWithData} } ) {
 
         # extract link type List
         my $LinkTypeList = $Param{ObjectLinkListWithData}->{$LinkType};
 
-        for my $Direction ( keys %{$LinkTypeList} ) {
+        for my $Direction ( sort keys %{$LinkTypeList} ) {
 
             # extract direction list
             my $DirectionList = $Param{ObjectLinkListWithData}->{$LinkType}->{$Direction};
 
-            for my $URLID ( keys %{$DirectionList} ) {
+            for my $URLID ( sort keys %{$DirectionList} ) {
 
                 $LinkList{$URLID}->{Data} = $DirectionList->{$URLID};
             }
@@ -208,12 +218,12 @@ sub TableCreateSimple {
     }
 
     my %LinkOutputData;
-    for my $LinkType ( keys %{ $Param{ObjectLinkListWithData} } ) {
+    for my $LinkType ( sort keys %{ $Param{ObjectLinkListWithData} } ) {
 
         # extract link type List
         my $LinkTypeList = $Param{ObjectLinkListWithData}->{$LinkType};
 
-        for my $Direction ( keys %{$LinkTypeList} ) {
+        for my $Direction ( sort keys %{$LinkTypeList} ) {
 
             # extract direction list
             my $DirectionList = $Param{ObjectLinkListWithData}->{$LinkType}->{$Direction};
@@ -288,7 +298,7 @@ Return
         },
     );
 
-    @SelectableObjectList = $LinkObject->SelectableObjectList(
+    @SelectableObjectList = $BackendObject->SelectableObjectList(
         Selected => $Identifier,  # (optional)
     );
 
@@ -335,7 +345,7 @@ Return
         },
     );
 
-    @SearchOptionList = $LinkObject->SearchOptionList(
+    @SearchOptionList = $BackendObject->SearchOptionList(
         SubObject => 'Bla',  # (optional)
     );
 
@@ -345,7 +355,6 @@ sub SearchOptionList {
     my ( $Self, %Param ) = @_;
 
     my $ParamObject  = $Kernel::OM->Get('Kernel::System::Web::Request');
-    my $LayoutObject = $Kernel::OM->Get('Kernel::Output::HTML::Layout');
 
     # search option list
     my @SearchOptionList = (
@@ -377,7 +386,7 @@ sub SearchOptionList {
             $Row->{FormData} = $ParamObject->GetParam( Param => $Row->{FormKey} );
 
             # parse the input text block
-            $LayoutObject->Block(
+            $Self->{LayoutObject}->Block(
                 Name => 'InputText',
                 Data => {
                     Key   => $Row->{FormKey},
@@ -386,7 +395,7 @@ sub SearchOptionList {
             );
 
             # add the input string
-            $Row->{InputStrg} = $LayoutObject->Output(
+            $Row->{InputStrg} = $Self->{LayoutObject}->Output(
                 TemplateFile => 'LinkObject',
             );
 
@@ -403,7 +412,7 @@ sub SearchOptionList {
             my %ListData;
 
             # add the input string
-            $Row->{InputStrg} = $LayoutObject->BuildSelection(
+            $Row->{InputStrg} = $Self->{LayoutObject}->BuildSelection(
                 Data       => \%ListData,
                 Name       => $Row->{FormKey},
                 SelectedID => $Row->{FormData},
@@ -426,7 +435,6 @@ sub SearchOptionList {
 
 This software comes with ABSOLUTELY NO WARRANTY. For details, see
 the enclosed file COPYING for license information (AGPL). If you
-did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
+did not receive this file, see L<http://www.gnu.org/licenses/agpl.txt>.
 
 =cut
-
