@@ -1,6 +1,5 @@
 # --
-# Kernel/System/LinkObject/URL.pm - to link ticket objects
-# Copyright (C) 2011 - 2014 Perl-Services.de, http://perl-services.de
+# Copyright (C) 2011 - 2022 Perl-Services.de, https://perl-services.de
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -12,13 +11,13 @@ package Kernel::System::LinkObject::URL;
 use strict;
 use warnings;
 
-our $VERSION = 0.02;
+use Kernel::System::VariableCheck qw(:all);
 
 our @ObjectDependencies = qw(
-    Kernel::System::URL
+    Kernel::Config
     Kernel::System::Log
+    Kernel::System::Ticket
 );
-
 sub new {
     my ( $Type, %Param ) = @_;
 

@@ -1,6 +1,5 @@
 # --
-# Kernel/System/URL.pm - All URL related functions should be here eventually
-# Copyright (C) 2011 - 2014 Perl-Services.de, http://perl-services.de
+# Copyright (C) 2011 - 2022 Perl-Services.de, https://perl-services.de
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -12,16 +11,18 @@ package Kernel::System::URL;
 use strict;
 use warnings;
 
-our $VERSION = 0.02;
+use Kernel::System::VariableCheck qw(:all);
 
 our @ObjectDependencies = qw(
-    Kernel::System::DB
+    Kernel::Config
     Kernel::System::Log
+    Kernel::System::Ticket
+    Kernel::System::DB
 );
 
 =head1 NAME
 
-Kernel::System::URL - backend for product news
+Kernel::System::URL - backend for URLs (used to link with tickets)
 
 =head1 PUBLIC INTERFACE
 
@@ -131,6 +132,7 @@ sub URLGet {
             Priority => 'error',
             Message  => 'Need ID!',
         );
+
         return;
     }
 
@@ -175,6 +177,7 @@ sub URLDelete {
             Priority => 'error',
             Message  => 'Need ID!',
         );
+
         return;
     }
 
@@ -200,6 +203,7 @@ sub URLSearch {
             Priority => 'error',
             Message  => "Need URL or Title!",
         );
+
         return;
     }
 
