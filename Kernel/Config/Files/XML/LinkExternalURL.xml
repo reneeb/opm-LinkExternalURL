@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<otrs_config version="2.0" init="Application">
+	<Setting Name="LinkObject::ComplexTable###URL" Required="0" Valid="1">
+        <Description Translatable="1">Define which columns are shown in the linked tickets widget (LinkObject::ViewMode = "complex"). Note: Only Ticket attributes and Dynamic Fields (DynamicField_NameX) are allowed for DefaultColumns.</Description>
+        <Navigation>Frontend::Agent::LinkObject</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="Module">Kernel::Output::HTML::LinkObject::URL.pm</Item>
+                <Item Key="DefaultColumns">
+                    <Hash>
+                        <DefaultItem ValueType="Select">
+                            <Item ValueType="Option" Value="0" Translatable="1">0 - Disabled</Item>
+                            <Item ValueType="Option" Value="1" Translatable="1">1 - Available</Item>
+                            <Item ValueType="Option" Value="2" Translatable="1">2 - Enabled by default</Item>
+                        </DefaultItem>
+                        <Item Key="URL" SelectedID="2"></Item>
+                        <Item Key="Title" SelectedID="2"></Item>
+                    </Hash>
+                </Item>
+                <Item Key="Priority">
+                    <Hash>
+                        <Item Key="URL">100</Item>
+                        <Item Key="Title">120</Item>
+                    </Hash>
+                </Item>
+            </Hash>
+        </Value>
+    </Setting>
+
+    <Setting Name="LinkObject::PossibleLink###0600-ExternalLink" Required="0" Valid="1">
+        <Description Translatable="1">Links a ticket with an URL.</Description>
+        <Navigation>Core::LinkObject</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="Object1">Ticket</Item>
+                <Item Key="Object2">URL</Item>
+                <Item Key="Type">ExternalLink</Item>
+            </Hash>
+        </Value>
+    </Setting>
+    <Setting Name="LinkObject::Type###ExternalLink" Required="1" Valid="1">
+        <Description Translatable="1">Defines the link type 'ExternalLink'. If the source name and the target name contain the same value, the resulting link is a non-directional one; otherwise, the result is a directional link.</Description>
+        <Navigation>Core::LinkObject</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="SourceName">ExternalLink</Item>
+                <Item Key="TargetName">ExternalLink</Item>
+            </Hash>
+        </Value>
+    </Setting>
+    <Setting Name="LinkObject::PossibleLink###0601-ExternalLinkChange" Required="0" Valid="0">
+        <Description Translatable="1">Links an ITSM change with an URL.</Description>
+        <Navigation>Core::LinkObject</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="Object1">ITSMChange</Item>
+                <Item Key="Object2">URL</Item>
+                <Item Key="Type">ExternalLink</Item>
+            </Hash>
+        </Value>
+    </Setting>
+    <Setting Name="LinkObject::PossibleLink###0602-ExternalLinkWorkorder" Required="0" Valid="0">
+        <Description Translatable="1">Links an ITSM workorder with an URL.</Description>
+        <Navigation>Core::LinkObject</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="Object1">ITSMWorkOrder</Item>
+                <Item Key="Object2">URL</Item>
+                <Item Key="Type">ExternalLink</Item>
+            </Hash>
+        </Value>
+    </Setting>
+    <Setting Name="LinkObject::PossibleLink###0603-ExternalLinkFAQ" Required="0" Valid="0">
+        <Description Translatable="1">Links a FAQ with an URL.</Description>
+        <Navigation>Core::LinkObject</Navigation>
+        <Value>
+            <Hash>
+                <Item Key="Object1">FAQ</Item>
+                <Item Key="Object2">URL</Item>
+                <Item Key="Type">ExternalLink</Item>
+            </Hash>
+        </Value>
+    </Setting>
+</otrs_config>

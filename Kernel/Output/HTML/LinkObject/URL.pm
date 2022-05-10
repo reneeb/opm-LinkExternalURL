@@ -1,41 +1,44 @@
 # --
-# Kernel/Output/HTML/LinkObjectURL.pm - layout backend module
-# Copyright (C) 2011 - 2014 Perl-Services.de, http://www.perl-services.de
+# Copyright (C) 2011 - 2022 Perl-Services.de, http://www.perl-services.de
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
 # did not receive this file, see http://www.gnu.org/licenses/agpl.txt.
 # --
 
-package Kernel::Output::HTML::LinkObjectURL;
+package Kernel::Output::HTML::LinkObject::URL;
 
 use strict;
 use warnings;
 
-our $VERSION = 0.02;
+use List::Util qw(first);
+
+use Kernel::Output::HTML::Layout;
+use Kernel::System::VariableCheck qw(:all);
+use Kernel::Language qw(Translatable);
 
 our @ObjectDependencies = qw(
-    Kernel::System::Web::Request
+    Kernel::Config
+    Kernel::Language
     Kernel::Output::HTML::Layout
+    Kernel::System::CustomerCompany
+    Kernel::System::CustomerUser
+    Kernel::System::DynamicField
+    Kernel::System::DynamicField::Backend
+    Kernel::System::JSON
+    Kernel::System::Log
+    Kernel::System::Priority
+    Kernel::System::State
+    Kernel::System::Type
+    Kernel::System::User
+    Kernel::System::Web::Request
 );
 
-=head1 NAME
-
-Kernel::Output::HTML::LinkObjectURL - layout backend module
-
-=head1 SYNOPSIS
-
-All layout functions of link object (URL)
-
-=over 4
-
-=cut
-
-=item new()
+=head2 new()
 
 create an object
 
-    $BackendObject = Kernel::Output::HTML::LinkObjectTicket->new(
+    $BackendObject = Kernel::Output::HTML::LinkObject::Ticket->new(
         UserLanguage => 'en',
         UserID       => 1,
     );
@@ -57,7 +60,6 @@ sub new {
     # We need our own LayoutObject instance to avoid blockdata collisions
     #   with the main page.
     $Self->{LayoutObject} = Kernel::Output::HTML::Layout->new( %{$Self} );
-
     # define needed variables
     $Self->{ObjectData} = {
         Object   => 'URL',
@@ -133,7 +135,6 @@ sub TableCreateComplex {
             }
         }
     }
-
     # create the item list
     my @ItemList;
     for my $URLID ( sort { $a <=> $b } keys %LinkList ) {
@@ -152,7 +153,6 @@ sub TableCreateComplex {
 
         push @ItemList, \@ItemColumns;
     }
-
     return if !@ItemList;
 
     # define the block data
@@ -166,7 +166,7 @@ sub TableCreateComplex {
         ],
         ItemList => \@ItemList,
     );
-
+	
     return ( \%Block );
 }
 
@@ -254,7 +254,7 @@ sub TableCreateSimple {
             $LinkOutputData{ $LinkType . '::' . $Direction }->{URL} = \@ItemList;
         }
     }
-
+	
     return %LinkOutputData;
 }
 
@@ -369,7 +369,6 @@ sub SearchOptionList {
             Type => 'Text',
         },
     );
-
     # add formkey
     for my $Row (@SearchOptionList) {
         $Row->{FormKey} = 'SEARCH::' . $Row->{Key};
@@ -411,6 +410,7 @@ sub SearchOptionList {
 
             my %ListData;
 
+	
             # add the input string
             $Row->{InputStrg} = $Self->{LayoutObject}->BuildSelection(
                 Data       => \%ListData,
